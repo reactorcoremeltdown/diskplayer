@@ -5,7 +5,7 @@ name: default
 
 platform:
   os: linux
-  arch: amd64
+  arch: arm
 
 clone:
   disable: true
