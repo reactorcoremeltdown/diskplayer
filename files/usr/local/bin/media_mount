@@ -3,7 +3,7 @@
 LOGFILE="/var/log/diskplayer.log"
 
 function log() {
-    echo "$(date) ${1}" >> ${LOGFILE}
+    echo "$(date) ${1}" | tee -a ${LOGFILE}
 }
 
 function play() {
@@ -16,7 +16,7 @@ function play() {
     mpc random off
     mpc volume 30
     mpc play 1 && log "Starting playback"
-    /ust/bin/umount --verbose /mnt/floppy && log "Unmounting floppy"
+    /usr/bin/umount --verbose /mnt/floppy && log "Unmounting floppy"
     echo "1" > /etc/diskplayer_status
 }
 
@@ -29,7 +29,8 @@ function retry_mount() {
             break
         else
             log "Trying to mount ${1} to /mnt/floppy, attempt ${i}..."
-            /usr/bin/mount --verbose $1 /mnt/floppy && log "Mounted ${1} successfully"
+            OUTPUT=`/usr/bin/mount --verbose $1 /mnt/floppy 2>&1`
+	    log "Mounting ${1}: ${OUTPUT}"
         fi
         log "Waiting for 2 seconds before next try"
         sleep 2
@@ -55,7 +56,7 @@ if [ ${LENGTH} -gt 0 ]; then
     fi
 else
     log "Device does not exist on machine."
-    /ust/bin/umount --verbose /mnt/floppy 2>&1 && log "Unmounted floppy successfully"
+    /usr/bin/umount --verbose /mnt/floppy 2>&1 && log "Unmounted floppy successfully"
     STATUS=$(cat /etc/diskplayer_status)
     if [[ ${STATUS} = '1' ]]; then
 	log "Stopping playback..."
